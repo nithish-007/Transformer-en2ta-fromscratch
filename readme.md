@@ -1,10 +1,10 @@
 ---
 title: Transformer-en2ta-fromscratch
 emoji: 🔤
-colorFrom: indigo
+colorFrom: red
 colorTo: blue
 sdk: gradio
-sdk_version: 5.35.0
+sdk_version: "5.35.0"
 app_file: app.py
 pinned: false
 ---
