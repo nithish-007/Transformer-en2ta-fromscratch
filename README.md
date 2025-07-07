@@ -130,10 +130,10 @@ Thanks to the open-source NLP community and datasets. Special credit to the [OPU
 
 ---
 
-## 📬 Contact
+<!-- ## 📬 Contact
 **Author:** Nithish Kumar  
 **Twitter:** [@nithish_codes](https://twitter.com/nithish_codes)  
-**Mail:** nithishkumar@example.com
+**Mail:** nithishkumar@example.com -->
 
 ---
 
