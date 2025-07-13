@@ -51,3 +51,8 @@ class PositionalEncoding(nn.Module):
 # -----------------------------------
 # Multi-head Attention
 # -----------------------------------
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model: int, h: int, dropout: float) -> None:
+        pass
+    
