@@ -54,5 +54,8 @@ class PositionalEncoding(nn.Module):
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model: int, h: int, dropout: float) -> None:
+        self.d_model = d_model # Embedding vector size
+        self.h = h # Number of heads
+        
         pass
     
