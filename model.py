@@ -57,7 +57,7 @@ class MultiHeadAttention(nn.Module):
         self.d_model = d_model # Embedding vector size
         self.h = h # Number of heads
 
-        # assert self.d_model % self.h == 0 # d_model is not divisible by h
+        assert self.d_model % self.h == 0 # d_model is divisible by h
 
        
     
