@@ -81,7 +81,7 @@ class MultiHeadAttention(nn.Module):
         # 
         attention_scores = (query @ key.transpose(-2, -1)) / math.sqrt(d_k)
         if mask is not None:
-            attention_scores = torch.masked_fill(attention_scores, mask==0, )
+            attention_scores = torch.masked_fill(attention_scores, mask==0, -1e9)
         attention_scores = torch.softmax(attention_scores, dim=1)
         if dropout is not None:
             attention_scores = dropout(attention_scores)
@@ -110,22 +110,53 @@ class MultiHeadAttention(nn.Module):
         # (batch, seq_len, d_model) --> (batch, seq_len, d_model)
         return self.w_o(x)
 
-# # --------------------------------
-# # LayerNormalization
-# # --------------------------------
+# --------------------------------
+# LayerNormalization
+# --------------------------------
 
-# class LayerNormalization(nn.Module):
-#     def __init__(self, features: int, eps:float = 10**-6) -> None:
-#         self.eps = eps
-#         self.alpha = nn.Parameter(torch.ones(features))
-#         self.bias = nn.Parameter(torch.zeros)
+class LayerNormalization(nn.Module):
+    def __init__(self, features: int, eps:float = 10**-6) -> None:
+        self.eps = eps
+        self.alpha = nn.Parameter(torch.ones(features)) # alpha is a learnable parameter
+        self.bias = nn.Parameter(torch.zeros(features)) # bias is a learnable parameter
+    
+    def forward(self, x):
+        # x: (batch, seq_len, hidden_size)
+        # keep the dimension for broadcasting
+        mean = x.mean(dim=-1, keepdim = True) # --> (batch, seq_len, 1)
+        std = x.std(dim = -1, keepdim = True) # --> (batch, seq_len , 1)
 
-# # ---------------------
-# # ResidualConnection
-# # ---------------------
+        # eps is to prevent dividing by zero or when std is very small 
+        return self.alpha * (x - mean) / (std + self.eps) + __build_class__
 
-# class ResidualConnection(nn.Module):
-#     def __init__(self, features: int, dropout: float) -> None:
-#         super().__init__()
-#         self.dropout = dropout
-#         self.norm = LayerNormalization
+# ---------------------
+# ResidualConnection
+# ---------------------
+
+class ResidualConnection(nn.Module):
+    def __init__(self, features: int, dropout: float) -> None:
+        super().__init__()
+        self.dropout = dropout
+        self.norm = LayerNormalization(features)
+    
+    def forward(self, x, sublayer):
+        return self.norm(x + self.dropout(sublayer(x)))
+    
+# ----------------------
+# FeedForwardBlock
+# ----------------------
+
+class FeedForwardBlock(nn.Module):
+    def __init__(self, d_model: int, d_ff:int, dropout: float) -> None:
+        super().__init__()
+        self.linear_1 = nn.Linear(d_model, d_ff) # w1 and b1
+        self.dropout = nn.Dropout(dropout)
+        self.linear_2 = nn.Linear(d_ff, d_model) # w2 and b2
+
+    def forward(self, x):
+        # (batch, seq_len, d_model) --> (batch, seq_len, d_ff) --> (batch, seq_len, d_model)
+        return self.linear_2(self.dropout(torch.relu(self.linear_1(x))))
+    
+
+    
+
