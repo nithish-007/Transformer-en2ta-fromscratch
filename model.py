@@ -54,7 +54,7 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         x = x + (self.pe[:, :x.shape[1], :]).requires_grad(False) # (batch, seq_len, d_model)
-        return self.dropout(x)
+        return self.dropo2ut(x)
     
 # -----------------------------------
 # Multi-head Attention
@@ -67,7 +67,7 @@ class MultiHeadAttention(nn.Module):
 
         assert self.d_model % self.h == 0 # d_model is divisible by h
 
-        self.d_k = self.d_model // self.h
+        self.d_k = self.d_model // self.h # dim for each heads
         self.w_q = nn.Linear(self.d_model, self.d_model, bias=False)
         self.w_k = nn.Linear(self.d_model, self.d_model, bias=False)
         self.w_v = nn.Linear(self.d_model, self.d_model, bias=False)
@@ -80,6 +80,7 @@ class MultiHeadAttention(nn.Module):
 
         # 
         attention_scores = (query @ key.transpose(-2, -1)) / math.sqrt(d_k)
+        attention_scores.
         if mask is not None:
             attention_scores = torch.masked_fill(attention_scores, mask==0, -1e9)
         attention_scores = torch.softmax(attention_scores, dim=1)
