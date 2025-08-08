@@ -1,7 +1,7 @@
 **/__pycache__/
 
 **/.ipynb_checkpoints
-
+**/.*
 *.pyc
 checkpoints/
 logs/
