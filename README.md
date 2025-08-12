@@ -121,7 +121,6 @@ Thanks to the open-source NLP community and datasets. Special credit to the [OPU
 
 <!-- ## 📬 Contact
 **Author:** Nithish Kumar  
-**Twitter:** [@nithish_codes](https://twitter.com/nithish_codes)  
 **Mail:** itsmedecoder07@gmail.com -->
 
 ---
