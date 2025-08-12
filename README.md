@@ -1,3 +1,14 @@
+---
+title: Transformer-en2ta-fromscratch
+emoji: 🏢
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 5.42.0
+app_file: app.py
+pinned: false
+---
+
 # 🧠 Transformer en2ta From Scratch: English to Tamil Machine Translation
 
 This repository contains a complete **from-scratch implementation of the Transformer architecture** from the paper ["Attention is All You Need"](https://arxiv.org/abs/1706.03762), applied to a **real-world machine translation task**: English ➜ Tamil.
