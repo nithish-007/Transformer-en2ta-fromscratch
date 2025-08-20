@@ -74,7 +74,6 @@ We use a cleaned subset of the **English-Tamil parallel corpus** from [Open Para
 git clone https://github.com/nithish-007/Transformers_from_scratch.git
 cd Transformers_from_scratch
 ```
-#
 ### 2. Install dependencies
 ```bash
 pip install -r requirements.txt
