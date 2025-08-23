@@ -31,10 +31,10 @@ class PositionalEncoding(nn.Module):
         super().__init__()
         self.d_model = d_model
         self.seq_len = seq_len
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
 
         # Create a pos_enc matrix of shape (seq_len, d_model)
-        pe = torch.zeros(seq_len, d_model)
+        self.pe = torch.zeros(seq_len, d_model)
         # position vector of shape (seq_len, 1)
         position = torch.arange(0, seq_len, dtype=torch.float).unsqueeze(1) # (seq_len, 1)
 
@@ -43,18 +43,18 @@ class PositionalEncoding(nn.Module):
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)) #(d_model / 2)
         
         # apply sine to even indices
-        pe[:, 0::2] = torch.sin(position * div_term) 
+        self.pe[:, 0::2] = torch.sin(position * div_term) 
         # apply cosine to off indices 
-        pe[:, 1::2] = torch.cos(position * div_term)
+        self.pe[:, 1::2] = torch.cos(position * div_term)
 
         # Add a batch dimension to the positional encoding 
-        pe = pe.unsqueeze(0) # (1, seq_len, d_model)
+        self.pe = self.pe.unsqueeze(0) # (1, seq_len, d_model)
         # Register the positional encoding as a buffer (to avoid it as a learnablr parameter)
-        self.register_buffer("pe", pe)
+        self.register_buffer("pe", self.pe)
 
     def forward(self, x):
-        x = x + (self.pe[:, :x.shape[1], :]).requires_grad(False) # (batch, seq_len, d_model)
-        return self.dropo2ut(x)
+        x = x + (self.pe[:, :x.shape[1], :]).requires_grad_(False) # (batch, seq_len, d_model)
+        return self.dropout(x)
     
 # -----------------------------------
 # Multi-head Attention
@@ -217,14 +217,14 @@ class DecoderBlock(nn.Module):
                  cross_attention_block: MultiHeadAttention, feed_forward_block: FeedForwardBlock,
                  dropout: float) -> None:
         super().__init__()
-        self.sel_attention_block = self_attention_block
+        self.self_attention_block = self_attention_block
         self.cross_attention_block = cross_attention_block
         self.feed_forward_block = feed_forward_block
         self.residual_connection = nn.ModuleList([ResidualConnection(features, dropout) for _ in range(3)])
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
-        x = self.residual_connection[0](x, lambda x: MultiHeadAttention(x,x,x, tgt_mask))
-        x = self.residual_connection[1](x, lambda x: MultiHeadAttention(x, encoder_output, encoder_output, src_mask))
+        x = self.residual_connection[0](x, lambda x: self.self_attention_block(x,x,x, tgt_mask))
+        x = self.residual_connection[1](x, lambda x: self.cross_attention_block(x, encoder_output, encoder_output, src_mask))
         x = self.residual_connection[2](x, self.feed_forward_block)
 
         return x
