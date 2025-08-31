@@ -1,7 +1,5 @@
-from cv2 import transposeND
-from posthog import project_root
 import torch
-from torch import dropout, nn
+from torch import nn
 import math
 
 # ---------------------------------
@@ -15,7 +13,7 @@ class InputEmbeddings(nn.Module):
         self.vocab_size = vocab_size
         self.embeddings = nn.Embedding(vocab_size, d_model)
 
-    def forwad(self, x):
+    def forward(self, x):
         # (batch, seq_len) --> (batch, seq_len, d_model)
         # Multiply by sqrt(d_model) to scale the embeddings according to the the paper
         return self.embeddings(x) * math.sqrt(self.d_model)
@@ -36,7 +34,7 @@ class PositionalEncoding(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
         # Create a pos_enc matrix of shape (seq_len, d_model)
-        self.pe = torch.zeros(seq_len, d_model)
+        pe = torch.zeros(seq_len, d_model)
         # position vector of shape (seq_len, 1)
         position = torch.arange(0, seq_len, dtype=torch.float).unsqueeze(1) # (seq_len, 1)
 
@@ -45,14 +43,14 @@ class PositionalEncoding(nn.Module):
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model)) #(d_model / 2)
         
         # apply sine to even indices
-        self.pe[:, 0::2] = torch.sin(position * div_term) 
+        pe[:, 0::2] = torch.sin(position * div_term) 
         # apply cosine to off indices 
-        self.pe[:, 1::2] = torch.cos(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
 
         # Add a batch dimension to the positional encoding 
-        self.pe = self.pe.unsqueeze(0) # (1, seq_len, d_model)
+        pe = pe.unsqueeze(0) # (1, seq_len, d_model)
         # Register the positional encoding as a buffer (to avoid it as a learnablr parameter)
-        self.register_buffer("pe", self.pe)
+        self.register_buffer("pe", pe)
 
     def forward(self, x):
         x = x + (self.pe[:, :x.shape[1], :]).requires_grad_(False) # (batch, seq_len, d_model)
@@ -65,6 +63,7 @@ class PositionalEncoding(nn.Module):
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model: int, h: int, dropout: float) -> None:
+        super().__init__()
         self.d_model = d_model # Embedding vector size
         self.h = h # Number of heads
 
@@ -86,7 +85,7 @@ class MultiHeadAttention(nn.Module):
         if mask is not None:
             # Write a very low value (indicating -inf) to the positions where mask == 0
             attention_scores = torch.masked_fill(attention_scores, mask==0, -1e9)
-        attention_scores = torch.softmax(attention_scores, dim=1) # (batch, h, seq_len, seq_len) # Apply softmax
+        attention_scores = torch.softmax(attention_scores, dim=-1) # (batch, h, seq_len, seq_len) # Apply softmax
         if dropout is not None:
             attention_scores = dropout(attention_scores)
         # (batch, h, seq_len, seq_len) --> (batch, h, seq_len, d_k)
@@ -137,6 +136,7 @@ class FeedForwardBlock(nn.Module):
 
 class LayerNormalization(nn.Module):
     def __init__(self, features: int, eps:float = 10**-6) -> None:
+        super().__init__()
         self.eps = eps
         self.alpha = nn.Parameter(torch.ones(features)) # alpha is a learnable parameter
         self.bias = nn.Parameter(torch.zeros(features)) # bias is a learnable parameter
@@ -244,9 +244,9 @@ class Decoder(nn.Module):
         self.layers = layers
         self.norm = LayerNormalization(features) #features --> d_model
 
-    def forward(self, x, encoder_output, src_mark, tgt_mask):
+    def forward(self, x, encoder_output, src_mask, tgt_mask):
         for layer in self.layers:
-            x = layer(x, encoder_output, src_mark, tgt_mask)
+            x = layer(x, encoder_output, src_mask, tgt_mask)
 
         return self.norm(x)
 
@@ -269,7 +269,7 @@ class Transformer(nn.Module):
     def encode(self, src, src_mask):
         # (batch, seq_len, d_model)
         src = self.src_embed(src)
-        src = self.pos(src)
+        src = self.src_pos(src)
         return self.encoder(src, src_mask)
     
     def decode(self, encoder_output: torch.Tensor, src_mask: torch.Tensor, 
@@ -281,13 +281,13 @@ class Transformer(nn.Module):
     
     def project(self, x):
         # (batch, seq_len, vocab_size)
-        return self.projection_layer(X)
+        return self.projection_layer(x)
 
 # -------------------------------
 # Build Transformer (assemble everything)
 # -------------------------------
 
-def bulid_transformers(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int, tgt_seq_len: int,
+def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int, tgt_seq_len: int,
                        d_model: int=512, N:int=6, h: int=8, dropout: float=0.1, d_ff: int=2048) ->Transformer:
     
     # Create the embedding layers
@@ -315,7 +315,8 @@ def bulid_transformers(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: in
         decoder_cross_attention_block = MultiHeadAttention(d_model=d_model, h=h, dropout=dropout)
         feed_forward_block = FeedForwardBlock(d_model=d_model, d_ff=d_ff, dropout=dropout)
         decoder_block = DecoderBlock(features=d_model, self_attention_block= decoder_self_attention_block,
-                                     cross_attention_block= decoder_cross_attention_block, feed_forward_block= feed_forward_block)
+                                     cross_attention_block= decoder_cross_attention_block, feed_forward_block= feed_forward_block,
+                                     dropout=dropout)
         decoder_blocks.append(decoder_block)
 
     # Create the encoder and decoder
@@ -335,3 +336,7 @@ def bulid_transformers(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: in
             nn.init.xavier_uniform(p)
 
     return transformer
+
+if __name__ == "__main__":
+    model = build_transformer(1000, 1000, 50, 50)
+    print(model)
