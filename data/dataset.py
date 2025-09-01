@@ -23,7 +23,7 @@ class BilingualDataset(Dataset):
 
         def __len__(self):
             return len(self.ds)
-        
+         
         def __getitem__(self, idx):
             src_target_pair = self.ds[idx]
             src_text = src_target_pair['translation'][self.src_lang]
