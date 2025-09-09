@@ -1,0 +1,21 @@
+# Model configuration
+d_model: 512
+n_layers: 6
+n_heads: 8
+d_ff: 2048
+dropout: 0.1
+
+# Training configuration
+batch_size: 32
+num_epochs: 50
+lr: 0.0001
+min_freq: 2 # Minimum word frequency for vocabulary
+
+# Data Configuration
+dataset_path: "Hemanth-thunder/en_ta"
+seq_len: 100
+num_workers: 4
+
+# Paths to store model and logs
+model_dir: "models"
+log_dir: "logs"

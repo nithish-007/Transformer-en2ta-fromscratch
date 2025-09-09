@@ -70,6 +70,7 @@ class MultiHeadAttention(nn.Module):
         assert self.d_model % self.h == 0 # d_model should be divisible by h
 
         self.d_k = self.d_model // self.h # dim for each heads
+        # Linear transformations for queries, keys, and values
         self.w_q = nn.Linear(self.d_model, self.d_model, bias=False)
         self.w_k = nn.Linear(self.d_model, self.d_model, bias=False)
         self.w_v = nn.Linear(self.d_model, self.d_model, bias=False)
@@ -120,14 +121,15 @@ class MultiHeadAttention(nn.Module):
 # ----------------------
 
 class FeedForwardBlock(nn.Module):
-    def __init__(self, d_model: int, d_ff:int, dropout: float) -> None:
+    def __init__(self, d_model: int, d_ff: int, dropout: float) -> None:
         super().__init__()
-        self.linear_1 = nn.Linear(d_model, d_ff) # w1 and b1
-        self.dropout = nn.Dropout(dropout)
-        self.linear_2 = nn.Linear(d_ff, d_model) # w2 and b2
+        self.linear_1 = nn.Linear(d_model, d_ff)  # First linear transformation
+        self.dropout = nn.Dropout(dropout)         # Dropout layer
+        self.linear_2 = nn.Linear(d_ff, d_model)   # Second linear transformation
 
     def forward(self, x):
-        # (batch, seq_len, d_model) --> (batch, seq_len, d_ff) --> (batch, seq_len, d_model)
+        # Two linear transformations with ReLU activation and dropout in between
+        # (batch, seq_len, d_model) -> (batch, seq_len, d_ff) -> (batch, seq_len, d_model)
         return self.linear_2(self.dropout(torch.relu(self.linear_1(x))))
 
 # --------------------------------
@@ -135,19 +137,19 @@ class FeedForwardBlock(nn.Module):
 # --------------------------------
 
 class LayerNormalization(nn.Module):
-    def __init__(self, features: int, eps:float = 10**-6) -> None:
+    def __init__(self, features: int, eps: float = 1e-6) -> None:
         super().__init__()
-        self.eps = eps
-        self.alpha = nn.Parameter(torch.ones(features)) # alpha is a learnable parameter
-        self.bias = nn.Parameter(torch.zeros(features)) # bias is a learnable parameter
+        self.eps = eps  # Small value to avoid division by zero
+        self.alpha = nn.Parameter(torch.ones(features))  # Learnable scale parameter
+        self.bias = nn.Parameter(torch.zeros(features))  # Learnable shift parameter
     
     def forward(self, x):
         # x: (batch, seq_len, hidden_size)
-        # keep the dimension for broadcasting
-        mean = x.mean(dim=-1, keepdim = True) # --> (batch, seq_len, 1)
-        std = x.std(dim = -1, keepdim = True) # --> (batch, seq_len , 1)
+        # Keep the dimension for broadcasting
+        mean = x.mean(dim=-1, keepdim=True)  # (batch, seq_len, 1)
+        std = x.std(dim=-1, keepdim=True)    # (batch, seq_len, 1)
 
-        # eps is to prevent dividing by zero or when std is very small 
+        # Normalize and apply learnable parameters
         return self.alpha * (x - mean) / (std + self.eps) + self.bias
   
 # ---------------------
@@ -161,7 +163,8 @@ class ResidualConnection(nn.Module):
         self.norm = LayerNormalization(features) # features --> d_model (we do norm across dim(512) for each word)
     
     def forward(self, x, sublayer):
-        return self.norm(x + self.dropout(sublayer(x)))
+        # Appling normalization, then the sublayer, then dropout, and add to input (skip connection)
+        return x + self.dropout(sublayer(self.norm(x)))
   
 # -------------------------------------------------
 # ProjectionLayer(nn.Module) - to get probability distro at decoder end
@@ -170,7 +173,7 @@ class ResidualConnection(nn.Module):
 class ProjectionLayer(nn.Module):
     def __init__(self, d_model, vocab_size) -> None:
         super().__init__()
-        self.projection = nn.Linear(d_model, vocab_size)
+        self.projection = nn.Linear(d_model, vocab_size) # Linear layer to vocab size
 
     def forward(self, x) -> None:
         # (batch, seq_len, d_model) --> (batch, seq_len, vocab_size)
@@ -337,6 +340,7 @@ def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int
 
     return transformer
 
-if __name__ == "__main__":
-    model = build_transformer(1000, 1000, 50, 50)
-    print(model)
+# # code to test the architecture
+# if __name__ == "__main__":
+#     model = build_transformer(1000, 1000, 50, 50)
+#     print(model)
