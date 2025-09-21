@@ -1,6 +1,7 @@
 # ------------------
 # dataset.py
 # ------------------
+
 from h11 import Data
 from scipy import special
 import torch
@@ -100,7 +101,7 @@ def build_vocabularies(dataset, min_freq=2):
 def get_dataloaders(config):
 
     # load dataset from HuggingFace
-    dataset = load_dataset(config["dataset_path"])
+    dataset = load_dataset(config["dataset_path"], split="train").train_test_split(test_size=0.2)
 
     # Build vocabularies from training data
     src_vocab, tgt_vocab = build_vocabularies(dataset["train"], min_freq = config["min_freq"])
@@ -111,7 +112,7 @@ def get_dataloaders(config):
     )
 
     val_dataset = WordLevelTranslationDataset(
-        dataset["validation"], src_vocab, tgt_vocab, config["seq_len"]
+        dataset["test"], src_vocab, tgt_vocab, config["seq_len"]
     )
 
     # Create data loaders
