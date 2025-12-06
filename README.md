@@ -10,7 +10,7 @@ pinned: false
 ---
 
 # 🧠 Transformer en2ta From Scratch: English to Tamil Machine Translation
-
+  
 This repository contains a complete **from-scratch implementation of the Transformer architecture** from the paper ["Attention is All You Need"](https://arxiv.org/abs/1706.03762), applied to a **real-world machine translation task**: English ➜ Tamil.
 
 The goal of this project is to:
@@ -53,6 +53,7 @@ This project implements the full Transformer architecture as proposed in the ori
 ├── train.py                 # Training loop
 ├── eval.py                  # Evaluation script
 ├── inference.py             # Run translation from terminal
+├── config.yaml
 ├── requirements.txt         # Python dependencies
 └── README.md                # Project overview
 ```
