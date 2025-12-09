@@ -7,14 +7,27 @@ import math
 # ---------------------------------
 
 class InputEmbeddings(nn.Module):
+    """
+    Converts input token indices into dense vector representations
+    """
     def __init__(self, d_model:int, vocab_size:int) -> None:
+        '''
+        Args:
+            d_model (int): Dimension of each embedding vector
+            vocab_size (int): size/ total number of unique tokens in the vocabulary
+        '''
         super().__init__()
         self.d_model = d_model
         self.vocab_size = vocab_size
         self.embeddings = nn.Embedding(vocab_size, d_model)
 
     def forward(self, x):
-        # (batch, seq_len) --> (batch, seq_len, d_model)
+        '''
+        Args:
+            x (torch.Tensor): Tensor of shape (batch, seq_len) containing token indices
+        Returns:
+            embeddings (torch.Tensor): Tensor of shape (batch, seq_len, d_model) containing the embedded representations
+        '''
         # Multiply by sqrt(d_model) to scale the embeddings according to the the paper
         return self.embeddings(x) * math.sqrt(self.d_model)
 
@@ -22,13 +35,18 @@ class InputEmbeddings(nn.Module):
 # ---------------------------------
 # Positional Embeddings
 # ---------------------------------
+# Sinusoidal Positional Encoding
 
-class PositionalEncoding(nn.Module):
+class SinusoidalPositionalEncoding(nn.Module):
     def __init__(self, d_model:int, seq_len:int, dropout:float) -> None:
         '''
-        pe[:, 0::2] = sin(pos / 10000**(2i/d_model))
-        pe[:, 1::2] = cos(pos / 10000**(2i/d_model))
+        Args:
+            d_model (int): Dimension of each embedding vector
+            seq_len (int): number of positions (max sequence length)
+            dropout (float): dropout rate
         '''
+        # pe[:, 0::2] = sin(pos / 10000**(2i/d_model))
+        # pe[:, 1::2] = cos(pos / 10000**(2i/d_model))
         super().__init__()
         self.d_model = d_model
         self.seq_len = seq_len
