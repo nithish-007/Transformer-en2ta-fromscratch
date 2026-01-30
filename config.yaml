@@ -19,3 +19,4 @@ num_workers: 4
 # Paths to store model and logs
 model_dir: "models"
 log_dir: "logs"
+ 
