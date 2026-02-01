@@ -1,22 +1,37 @@
-# Model configuration
+# Model Configuration
 d_model: 512
 n_layers: 6
 n_heads: 8
 d_ff: 2048
 dropout: 0.1
 
-# Training configuration
-batch_size: 32
-num_epochs: 50
-lr: 0.0001
-min_freq: 2 # Minimum word frequency for vocabulary
+# Training Configuration
+batch_size: 16
+num_epochs: 20
+learning_rate: 0.0001
 
 # Data Configuration
-dataset_path: "Hemanth-thunder/en_ta"
-seq_len: 100
-num_workers: 4
+dataset_name: "jarvisvasu/english-to-colloquial-tamil"
+seq_len: 150
+tokenizer_type: "BPE"  # BPE or word_level
 
-# Paths to store model and logs
-model_dir: "models"
+# Tokenizer Paths
+src_tokenizer_path: "tokenizer_en.json"
+tgt_tokenizer_path: "tokenizer_ta.json"
+
+# Decoding Configuration
+beam_size: 5
+
+# Early Stopping
+early_stopping_patience: 5
+early_stopping_min_delta: 0.001
+
+# Paths
+checkpoint_dir: "checkpoints"
 log_dir: "logs"
- 
+
+# Dataset Columns
+# Dataset has: instruction, input, output
+# - input: English sentences
+# - output: Tamil translations
+# - instruction: Task description (not used in training)
