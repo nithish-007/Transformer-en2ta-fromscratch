@@ -251,15 +251,15 @@ class MultiHeadAttention(nn.Module):
         return self.w_o(x)
     
 
-def causal_mask(seq_len):
-    """
-    Causal mask ensures that positions above the main diagonal are masked out, preventing the model from attending to future tokens during decoding.
+# def causal_mask(seq_len):
+#     """
+#     Causal mask ensures that positions above the main diagonal are masked out, preventing the model from attending to future tokens during decoding.
 
-    Args:
-        seq_len (int): Length of the sequence to generate the mask for.
+#     Args:
+#         seq_len (int): Length of the sequence to generate the mask for.
 
-    Returns:
-        torch.BoolTensor: A mask tensor of shape (1, seq_len, seq_len) where True values indicate allowed positions and False values indicate masked positions.
-    """
-    mask = torch.triu(torch.ones((1, seq_len, seq_len)), diagonal=1).type(torch.int)    # All the values above diagonal will be 1
-    return mask == 0    # All the values above diagonal will be 0, and rest will be 1
+#     Returns:
+#         torch.BoolTensor: A mask tensor of shape (1, seq_len, seq_len) where True values indicate allowed positions and False values indicate masked positions.
+#     """
+#     mask = torch.triu(torch.ones((1, seq_len, seq_len)), diagonal=1).type(torch.int)    # All the values above diagonal will be 1
+#     return mask == 0    # All the values above diagonal will be 0, and rest will be 1
