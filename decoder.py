@@ -29,6 +29,16 @@ class DecoderBlock(nn.Module):
         )
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
+        ''' 
+        Args:
+            x (torch.Tensor): Target input tensor of shape (batch, seq_len, d_model)
+            encoder_output (torch.Tensor): Encoder output tensor of shape (batch, seq_len, d_model)
+            src_mask (torch.Tensor): Source mask for attention mechanism
+            tgt_mask (torch.Tensor): Target mask for attention mechanism
+
+        Returns:
+            x (torch.Tensor): Target Output tensor of shape (batch, seq_len, d_model)
+        '''
         x = self.residual_connections[0](x, lambda x: self.self_attention_block(x,x,x, tgt_mask))
         x = self.residual_connections[1](x, lambda x: self.cross_attention_block(x, encoder_output, encoder_output, src_mask))
         x = self.residual_connections[2](x, self.feed_forward_block)
@@ -40,12 +50,31 @@ class DecoderBlock(nn.Module):
 # ------------------------------
 
 class Decoder(nn.Module):
-    def __init__(self, features: int, layers: nn.ModuleList):
+    '''
+    Full decoder network consisting of multiple decoder layers followed by layer normalization.
+    '''
+    def __init__(self, d_model: int, layers: nn.ModuleList):
+        '''
+        Args:
+            d_model (int): Dimension of each embedding vector
+            layers (nn.ModuleList): List of DecoderBlock layers
+
+        '''
         super().__init__()  
         self.layers = layers
-        self.norm = LayerNormalization(features) #features --> d_model
+        self.norm = LayerNormalization(d_model) # d_model --> features
 
     def forward(self, x, encoder_output, src_mask, tgt_mask):
+        ''' 
+        Args:
+            x (torch.Tensor): Target input tensor of shape (batch, seq_len, d_model)
+            encoder_output (torch.Tensor): Encoder output tensor of shape (batch, seq_len, d_model)
+            src_mask (torch.Tensor): Source mask for attention mechanism
+            tgt_mask (torch.Tensor): Target mask for attention mechanism
+        
+        Returns:
+            x (torch.Tensor): Output tensor of shape (batch, seq_len, d_model)
+        '''
         for layer in self.layers:
             x = layer(x, encoder_output, src_mask, tgt_mask)
 
