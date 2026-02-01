@@ -39,7 +39,7 @@ class EncoderBlock(nn.Module):
         x = self.residual_connections[1](x, self.feed_forward_block)
         return x
 
-    
+     
 # ------------------------------
 # Encoder (full encoder network)
 # ------------------------------
