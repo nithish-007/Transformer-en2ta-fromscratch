@@ -1,6 +1,6 @@
 import torch 
 from torch import nn
-from utils import (MultiHeadAttention, FeedForwardBlock, LayerNormalization, ResidualConnection,
+from src.utils import (MultiHeadAttention, FeedForwardBlock, LayerNormalization, ResidualConnection,
                    )
 # -------------------------
 # DecoderBlock (single decoder layer)

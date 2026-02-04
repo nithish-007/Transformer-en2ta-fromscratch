@@ -9,135 +9,247 @@ app_file: app.py
 pinned: false
 ---
 
-# 🧠 Transformer en2ta From Scratch: English to Tamil Machine Translation
-  
-This repository contains a complete **from-scratch implementation of the Transformer architecture** from the paper ["Attention is All You Need"](https://arxiv.org/abs/1706.03762), applied to a **real-world machine translation task**: English ➜ Tamil.
+# Transformer English to Tamil Translation - From Scratch
 
-The goal of this project is to:
-- Gain deep, hands-on understanding of the Transformer architecture.
-- Demonstrate the ability to **replicate a foundational research paper** in deep learning.
-- Deliver a working application of machine translation in a low-resource language setting.
+A complete PyTorch implementation of the Transformer architecture from ["Attention is All You Need"](https://arxiv.org/abs/1706.03762) paper, applied to English-to-Tamil machine translation using real-world datasets.
 
----
+## Overview
 
-## 📌 Features
-- Pure PyTorch implementation (no `nn.Transformer` shortcuts)
-- Manual implementation of:
-  - Input & positional embeddings
-  - Multi-head scaled dot-product attention
-  - Encoder & decoder blocks
-  - Masking & layer normalization
-- Custom training loop for translation
-- BLEU score evaluation
-- English ➜ Tamil dataset preprocessing
+This project implements every component of the Transformer architecture without using `nn.Transformer`. All modules including multi-head attention, positional encoding, encoder-decoder blocks, and layer normalization are built from scratch to provide deep understanding of the architecture.
+
+**Dataset:** jarvisvasu/english-to-colloquial-tamil from HuggingFace  
+**Training:** 14,375 pairs | **Validation:** 799 pairs | **Test:** 799 pairs
 
 ---
 
-## 🧱 Architecture
-This project implements the full Transformer architecture as proposed in the original paper:
+## Features
 
-- 6 Encoder Layers
-- 6 Decoder Layers
-- 8 Attention Heads
-- Model Dim: 512
-- FFN Hidden Dim: 2048
+- Pure PyTorch implementation without high-level abstractions
+- Complete Transformer architecture with all components built from scratch
+- BPE tokenization for both English and Tamil
+- Training pipeline with TensorBoard logging
+- Validation with BLEU score metrics
+- Greedy decoding and beam search inference
+- Early stopping mechanism
+- Model checkpointing and best model tracking
+- Configuration-based training via YAML files
+- Interactive translation mode
 
 ---
 
-## 📂 Folder Structure
-```bash
-.
-├── data/                     # Raw and preprocessed data
-├── models/                  # Model components (encoder, decoder, attention, etc.)
-├── utils/                   # Tokenizers, BLEU scoring, masking utils
-├── train.py                 # Training loop
-├── eval.py                  # Evaluation script
-├── inference.py             # Run translation from terminal
-├── config.yaml
-├── requirements.txt         # Python dependencies
-└── README.md                # Project overview
+## Architecture
+
+**Model Configuration:**
+- Encoder Layers: 6
+- Decoder Layers: 6
+- Attention Heads: 8
+- Model Dimension: 512
+- Feed-Forward Dimension: 2048
+- Dropout: 0.1
+- Sequence Length: 256
+- Total Parameters: ~73M
+
+**Components:**
+- Sinusoidal Positional Encoding
+- Multi-Head Scaled Dot-Product Attention
+- Pre-Layer Normalization (Pre-LN) variant
+- Residual Connections
+- Feed-Forward Networks
+- Causal Masking for decoder
+- Xavier Uniform weight initialization
+
+---
+
+## Project Structure
+
+```
+pytorch-transformer-from-scratch/
+│
+├── src/                          # Source code modules
+│   ├── model.py                  # Main Transformer class
+│   ├── encoder.py                # Encoder and EncoderBlock
+│   ├── decoder.py                # Decoder, DecoderBlock, ProjectionLayer
+│   ├── utils.py                  # Attention, Embeddings, FFN, LayerNorm
+│   └── data_loader.py            # Dataset, tokenizers, dataloaders
+│
+├── train.py                      # Training pipeline with validation
+├── test.py                       # Testing and interactive translation
+├── requirements.txt              # Python dependencies
+│
+├── checkpoints/                  # Model checkpoints (created during training)
+├── logs/                         # TensorBoard logs (created during training)
+│
+├── config/                       # Training configuration file
+│   └── config.yaml                   
+│
+├── token_files/                  # Tokenizer JSON files (auto-generated)
+│   ├── tokenizer_en.json
+│   └── tokenizer_ta.json
+│
+└── README.md                     # This file
 ```
 
 ---
 
-## 🔤 Dataset
-We use a cleaned subset of the **English-Tamil parallel corpus** from [Open Parallel Corpus (OPUS)](https://opus.nlpl.eu/).
+## Installation
 
-- Sentences are tokenized and preprocessed.
-- Byte Pair Encoding (BPE) or SentencePiece tokenizer used.
+### 1. Clone the Repository
 
----
-
-## 🚀 Getting Started
-
-### 1. Clone the repository
 ```bash
 git clone https://github.com/nithish-007/Transformers_from_scratch.git
-cd Transformers_from_scratch
+cd pytorch-transformer-from-scratch
 ```
-### 2. Install dependencies
+
+### 2. Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Preprocess data
+**Key Dependencies:**
+- torch >= 2.0.0
+- datasets (HuggingFace)
+- tokenizers
+- nltk
+- tensorboard
+- tqdm
+- pyyaml
+
+---
+
+## Quick Start
+
+### Train the Model
+
 ```bash
-python utils/preprocess.py --src en --tgt ta
+python train.py
 ```
 
-### 4. Train the model
+Training uses settings from `config.yaml` by default. To use a custom config:
+
 ```bash
-python train.py --epochs 20 --batch_size 64 --lr 1e-4
+python train.py --config custom_config.yaml
 ```
 
-### 5. Evaluate
+### Monitor Training
+
 ```bash
-python eval.py
+tensorboard --logdir=logs
 ```
 
-### 6. Translate
+### Test the Model
+
 ```bash
-python inference.py --sentence "How are you?"
-# Output: "நீங்கள் எப்படி இருக்கிறீர்கள்?"
+python test.py --checkpoint checkpoints/best_model.pt
+```
+
+### Interactive Translation
+
+```bash
+python test.py --checkpoint checkpoints/best_model.pt --interactive
+```
+
+### Testing with Greedy Decoding
+
+```bash
+python test.py --checkpoint checkpoints/best_model.pt --greedy --num-examples 10
+```
+
+### Testing with Custom Beam Size
+
+```bash
+python test.py --checkpoint checkpoints/best_model.pt --beam-size 10
 ```
 
 ---
 
-## 📈 Results
-- Evaluation metric: BLEU score
-- Results after 20 epochs:
-  - BLEU (dev): 22.5
-  - BLEU (test): 21.3
+## Configuration
+
+Edit `config.yaml` to customize training parameters:
 
 ---
 
-## 🎓 Learnings
-- Built Transformer model from **absolute scratch**
-- Learned nuances of attention, masking, and decoder training
-- Understood real-world challenges in **low-resource NLP tasks**
+## Training Pipeline
+
+The training pipeline includes:
+
+1. **Data Loading:** Automatic tokenizer building and dataset splitting (90/5/5)
+2. **Model Initialization:** Xavier uniform weight initialization
+3. **Training Loop:** 
+   - Cross-entropy loss with padding token masking
+   - Adam optimizer with gradient clipping
+   - TensorBoard logging every 10 steps
+4. **Validation:** 
+   - Runs after each epoch on subset of validation data
+   - Both greedy and beam search decoding
+   - BLEU score calculation
+5. **Checkpointing:**
+   - Saves checkpoint after every epoch
+   - Tracks and saves best model based on beam search BLEU
+6. **Early Stopping:**
+   - Monitors validation BLEU score
+   - Stops training if no improvement for N epochs
 
 ---
 
-## 📚 References
+## Code Architecture
+
+### Core Components
+
+**1. model.py**
+- `Transformer`: Main model class with encode/decode/project methods
+- `build_transformer()`: Factory function to assemble all components
+
+**2. encoder.py**
+- `EncoderBlock`: Self-attention + FFN with residual connections
+- `Encoder`: Stack of N encoder blocks with final layer normalization
+
+**3. decoder.py**
+- `DecoderBlock`: Self-attention + cross-attention + FFN
+- `Decoder`: Stack of N decoder blocks
+- `ProjectionLayer`: Maps decoder output to vocabulary logits
+
+**4. utils.py**
+- `MultiHeadAttention`: Scaled dot-product attention with multiple heads
+- `EmbeddingLayer`: Token embeddings
+- `SinusoidalPositionalEncoding`: Position embeddings
+- `FeedForwardBlock`: Two-layer MLP with ReLU
+- `LayerNormalization`: Layer normalization
+- `ResidualConnection`: Residual wrapper with dropout
+
+**5. data_loader.py**
+- `TranslationDataset`: PyTorch dataset for translation pairs
+- `causal_mask()`: Lower triangular mask for decoder
+- `get_or_build_tokenizer()`: BPE tokenizer training/loading
+- `create_dataloaders()`: Complete data pipeline
+
+---
+
+## Results
+
+Training results will vary based on dataset size and hyperparameters. Monitor TensorBoard for:
+- Training loss curves
+- Validation BLEU scores (greedy and beam search)
+- Learning progress over epochs
+
+---
+
+## References
+
 - Vaswani et al., ["Attention is All You Need"](https://arxiv.org/abs/1706.03762)
-- Harvard NLP Annotated Transformer
-- OpenNMT, Fairseq, and PyTorch source code
+- Harvard NLP [Annotated Transformer](http://nlp.seas.harvard.edu/annotated-transformer/)
+- PyTorch Documentation
 
 ---
 
-## 🙌 Acknowledgements
-Thanks to the open-source NLP community and datasets. Special credit to the [OPUS corpus](https://opus.nlpl.eu/) for providing valuable multilingual data.
+## License
+
+This project is licensed under the terms specified in the LICENSE file.
 
 ---
 
-<!-- ## 📬 Contact
-**Author:** Nithish Kumar  
-**Mail:** itsmedecoder07@gmail.com -->
+## Acknowledgments
 
----
-
-If you like this work, give it a ⭐️ on GitHub and share it with others interested in Transformers!
-
----
-
-> 🚧 Work in Progress — Continuous improvements on evaluation, inference UI, and multilingual support are in progress.
+- Dataset: jarvisvasu/english-to-colloquial-tamil from HuggingFace
+- Inspired by the original Transformer paper and various open-source implementations
+- Built with PyTorch, HuggingFace datasets, and tokenizers libraries

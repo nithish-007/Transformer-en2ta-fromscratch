@@ -12,12 +12,12 @@ learning_rate: 0.0001
 
 # Data Configuration
 dataset_name: "jarvisvasu/english-to-colloquial-tamil"
-seq_len: 150
+seq_len: 512
 tokenizer_type: "BPE"  # BPE or word_level
 
 # Tokenizer Paths
-src_tokenizer_path: "tokenizer_en.json"
-tgt_tokenizer_path: "tokenizer_ta.json"
+src_tokenizer_path: "token_files/tokenizer_en.json"
+tgt_tokenizer_path: "token_files/tokenizer_ta.json"
 
 # Decoding Configuration
 beam_size: 5

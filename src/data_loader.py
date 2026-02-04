@@ -19,7 +19,7 @@ def causal_mask(size):
     Returns:
         torch.Tensor: Causal mask of shape (1, size, size)
     """
-    mask = torch.tril(torch.ones((1, size, size)))
+    mask = torch.tril(torch.ones((1, size, size))).int()
     return mask
 
 

@@ -8,8 +8,8 @@ from pathlib import Path
 import nltk
 import yaml
 
-from model import build_transformer
-from data_loader import create_dataloaders
+from src.model import build_transformer
+from src.data_loader import create_dataloaders
 
 
 class EarlyStopping:
@@ -402,11 +402,11 @@ def train_model(config_path="config.yaml"):
                 'model_state_dict': model.state_dict(),
                 'bleu_score': best_bleu
             }, best_model_path)
-            print(f"✓ New best model saved! BLEU: {best_bleu:.4f}")
+            print(f"New best model saved! BLEU: {best_bleu:.4f}")
         
         # Early stopping check
         if early_stopping(bleu_beam):
-            print(f"\n⚠ Early stopping triggered at epoch {epoch+1}")
+            print(f"\nEarly stopping triggered at epoch {epoch+1}")
             print(f"Best BLEU score: {early_stopping.best_bleu:.4f}")
             break
     

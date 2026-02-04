@@ -1,10 +1,10 @@
 import torch 
 from torch import nn
 import math   
-from utils import (MultiHeadAttention, FeedForwardBlock, LayerNormalization, ResidualConnection,
+from src.utils import (MultiHeadAttention, FeedForwardBlock, LayerNormalization, ResidualConnection,
                    EmbeddingLayer, SinusoidalPositionalEncoding)
-from encoder import Encoder, EncoderBlock
-from decoder import Decoder, DecoderBlock, ProjectionLayer
+from src.encoder import Encoder, EncoderBlock
+from src.decoder import Decoder, DecoderBlock, ProjectionLayer
 
 # -------------------------------
 # Transformer 

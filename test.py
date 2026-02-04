@@ -6,8 +6,8 @@ import argparse
 import nltk
 import yaml
 
-from model import build_transformer
-from data_loader import create_dataloaders
+from src.model import build_transformer
+from src.data_loader import create_dataloaders
 from train import greedy_decode, beam_search_decode
 
 
@@ -49,9 +49,8 @@ def test_model(checkpoint_path, config_path="config.yaml", num_examples=5,
     print(f"Using device: {device}")
     
     # Load data
-    print("\n" + "="*80)
-    print("LOADING DATA")
-    print("="*80)
+    print("\n")
+    print("------------------ LOADING DATA ------------------")
     _, _, test_loader, src_tokenizer, tgt_tokenizer = create_dataloaders(
         dataset_name=dataset_name,
         src_tokenizer_path=src_tokenizer_path,
@@ -62,9 +61,8 @@ def test_model(checkpoint_path, config_path="config.yaml", num_examples=5,
     )
     
     # Build model
-    print("\n" + "="*80)
-    print("BUILDING MODEL")
-    print("="*80)
+    print("\n")
+    print("------------------ BUILDING MODEL ------------------")
     model = build_transformer(
         src_vocab_size=src_tokenizer.get_vocab_size(),
         tgt_vocab_size=tgt_tokenizer.get_vocab_size(),
@@ -89,9 +87,8 @@ def test_model(checkpoint_path, config_path="config.yaml", num_examples=5,
         print(f"Model's BLEU score: {checkpoint['bleu_score']:.4f}")
     
     # Test
-    print("\n" + "="*80)
     print(f"TESTING ({'Beam Search' if use_beam_search else 'Greedy Decoding'})")
-    print("="*80)
+    print("-"*80)
     
     source_texts = []
     expected = []

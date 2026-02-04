@@ -3,5 +3,5 @@
 **/.ipynb_checkpoints
 **/.*
 *.pyc
-checkpoints/
+# checkpoints/
 logs/
