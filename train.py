@@ -276,9 +276,8 @@ def train_model(config_path="config.yaml"):
     os.makedirs("logs", exist_ok=True)
     
     # Load data
-    print("\n" + "="*80)
-    print("LOADING DATA")
-    print("="*80)
+    print("\n")
+    print("------------------ LOADING DATA ------------------")
     train_loader, val_loader, test_loader, src_tokenizer, tgt_tokenizer = create_dataloaders(
         dataset_name=dataset_name,
         src_tokenizer_path=src_tokenizer_path,
@@ -289,9 +288,8 @@ def train_model(config_path="config.yaml"):
     )
     
     # Build model
-    print("\n" + "="*80)
-    print("BUILDING MODEL")
-    print("="*80)
+    print("\n")
+    print("------------------ BUILDING MODEL ------------------")
     model = build_transformer(
         src_vocab_size=src_tokenizer.get_vocab_size(),
         tgt_vocab_size=tgt_tokenizer.get_vocab_size(),
@@ -321,9 +319,8 @@ def train_model(config_path="config.yaml"):
                                    min_delta=early_stopping_min_delta)
     
     # Training loop
-    print("\n" + "="*80)
-    print("TRAINING")
-    print("="*80)
+    print("\n")
+    print("------------------ TRAINING ------------------")
     
     global_step = 0
     best_bleu = 0.0
@@ -386,7 +383,7 @@ def train_model(config_path="config.yaml"):
         print(f"Checkpoint saved: {checkpoint_path}")
         
         # Run validation
-        print(f"\nValidation for epoch {epoch+1}:")
+        print(f"\n------------------ VALIDATION for epoch {epoch+1} ------------------")
         bleu_greedy, bleu_beam = run_validation(model, val_loader, tgt_tokenizer, device, 
                                                 num_examples=2, num_batches=10)
         
@@ -411,11 +408,9 @@ def train_model(config_path="config.yaml"):
             break
     
     writer.close()
-    print("\n" + "="*80)
-    print("TRAINING COMPLETED")
+    print("\n")
+    print("------------------ TRAINING COMPLETED ------------------")
     print(f"Best BLEU Score: {best_bleu:.4f}")
-    print("="*80)
-
 
 if __name__ == "__main__":
     import argparse
